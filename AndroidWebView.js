@@ -10,8 +10,8 @@
  */
 import React, {
   Component,
-  PropTypes,
 } from 'react';
+import PropTypes from 'prop-types';
 import ReactNative, {
   EdgeInsetsPropType,
   ActivityIndicator,
@@ -169,6 +169,13 @@ class AndroidWebView extends Component {
     javaScriptEnabled: PropTypes.bool,
 
     /**
+     * Used on Android Lollipop and above only, third party cookies are enabled
+     * by default for WebView on Android Kitkat and below and on iOS
+     * @platform android
+     */
+    thirdPartyCookiesEnabled: PropTypes.bool,
+
+    /**
      * Used on Android only, controls whether DOM Storage is enabled or not
      * @platform android
      */
@@ -212,11 +219,71 @@ class AndroidWebView extends Component {
      * @platform android
      */
     allowUniversalAccessFromFileURLs: PropTypes.bool,
+
+    /**
+     * Function that accepts a string that will be passed to the WebView and
+     * executed immediately as JavaScript.
+     */
+    injectJavaScript: PropTypes.func,
+
+    /**
+     * Specifies the mixed content mode. i.e WebView will allow a secure origin to load content from any other origin.
+     *
+     * Possible values for `mixedContentMode` are:
+     *
+     * - `'never'` (default) - WebView will not allow a secure origin to load content from an insecure origin.
+     * - `'always'` - WebView will allow a secure origin to load content from any other origin, even if that origin is insecure.
+     * - `'compatibility'` -  WebView will attempt to be compatible with the approach of a modern web browser with regard to mixed content.
+     * @platform android
+     */
+    mixedContentMode: PropTypes.oneOf([
+      'never',
+      'always',
+      'compatibility'
+    ]),
+
+    /**
+     * Used on Android only, controls whether form autocomplete data should be saved
+     * @platform android
+     */
+    saveFormDataDisabled: PropTypes.bool,
+
+    /**
+     * Override the native component used to render the WebView. Enables a custom native
+     * WebView which uses the same JavaScript as the original WebView.
+     */
+    nativeConfig: PropTypes.shape({
+      /*
+       * The native component used to render the WebView.
+       */
+      component: PropTypes.any,
+      /*
+       * Set props directly on the native component WebView. Enables custom props which the
+       * original WebView doesn't pass through.
+       */
+      props: PropTypes.object,
+      /*
+       * Set the ViewManager to use for communcation with the native side.
+       * @platform ios
+       */
+      viewManager: PropTypes.object,
+    }),
+    /*
+     * Used on Android only, controls whether the given list of URL prefixes should
+     * make {@link com.facebook.react.views.webview.ReactWebViewClient} to launch a
+     * default activity intent for those URL instead of loading it within the webview.
+     * Use this to list URLs that WebView cannot handle, e.g. a PDF url.
+     * @platform android
+     */
+    urlPrefixesForDefaultIntent: PropTypes.arrayOf(PropTypes.string),
   };
 
   static defaultProps = {
-    javaScriptEnabled: true,
+    javaScriptEnabled : true,
+    thirdPartyCookiesEnabled: true,
     scalesPageToFit: true,
+    saveFormDataDisabled: false,
+    uploadEnabledAndroid: true,
   };
 
   state = {
@@ -353,6 +420,8 @@ class AndroidWebView extends Component {
       console.warn('WebView: `source.body` is not supported when using GET.');
     }
 
+    const nativeConfig = this.props.nativeConfig || {};
+
     const webView = (
       <WebViewForAndroid
         ref={(c) => { this[RCT_WEBVIEW_REF] = c; }}
@@ -363,6 +432,7 @@ class AndroidWebView extends Component {
         injectedJavaScript={this.props.injectedJavaScript}
         userAgent={this.props.userAgent}
         javaScriptEnabled={this.props.javaScriptEnabled}
+        thirdPartyCookiesEnabled={this.props.thirdPartyCookiesEnabled}
         domStorageEnabled={this.props.domStorageEnabled}
         messagingEnabled={typeof this.props.onMessage === 'function'}
         onMessage={this.onMessage}
@@ -374,7 +444,12 @@ class AndroidWebView extends Component {
         onLoadingError={this.onLoadingError}
         testID={this.props.testID}
         mediaPlaybackRequiresUserAction={this.props.mediaPlaybackRequiresUserAction}
-        uploadEnabledAndroid={true}
+        uploadEnabledAndroid={this.props.uploadEnabledAndroid}
+        allowUniversalAccessFromFileURLs={this.props.allowUniversalAccessFromFileURLs}
+        mixedContentMode={this.props.mixedContentMode}
+        saveFormDataDisabled={this.props.saveFormDataDisabled}
+        urlPrefixesForDefaultIntent={this.props.urlPrefixesForDefaultIntent}
+        {...nativeConfig.props}
       />
     );
 
