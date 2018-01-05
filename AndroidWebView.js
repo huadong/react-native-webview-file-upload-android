@@ -17,6 +17,7 @@ import ReactNative, {
   ActivityIndicator,
   StyleSheet,
   UIManager,
+  View,
   ViewPropTypes,
   requireNativeComponent,
 } from 'react-native';
