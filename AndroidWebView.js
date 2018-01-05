@@ -17,7 +17,7 @@ import ReactNative, {
   ActivityIndicator,
   StyleSheet,
   UIManager,
-  View,
+  ViewPropTypes,
   requireNativeComponent,
 } from 'react-native';
 import warning from 'warning';
@@ -94,7 +94,7 @@ const defaultRenderLoading = () => (
  */
 class AndroidWebView extends Component {
   static propTypes = {
-    ...View.propTypes,
+    ...ViewPropTypes,
     renderError: PropTypes.func,
     renderLoading: PropTypes.func,
     onLoad: PropTypes.func,
@@ -107,7 +107,7 @@ class AndroidWebView extends Component {
     onMessage: PropTypes.func,
     onContentSizeChange: PropTypes.func,
     startInLoadingState: PropTypes.bool, // force WebView to show loadingView on first load
-    style: View.propTypes.style,
+    style: ViewPropTypes.style,
 
     html: deprecatedPropType(
       PropTypes.string,
